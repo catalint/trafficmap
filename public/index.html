@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: #269abc;
+        min-width: 960px;
+    }
+
+    /**
+    5cb85c
+    269abc
+
+
+    */
+</style>
+<body>
+<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+<script>
+    var base = d3.select("body");
+
+    var chart = base.append("canvas")
+            .attr("width", window.innerWidth)
+            .attr("height", window.innerHeight);
+    var context = chart.node().getContext("2d");
+
+    var servers = {
+        'internet': {name: 'browser', x: 200, y: 200},
+        'web1'    : {name: 'web 1', x: 200, y: 500},
+        'web2'    : {name: 'web 2', x: 600, y: 500},
+        'web3'    : {name: 'web 3', x: 400, y: 500},
+        'api'     : {name: 'api', x: 400, y: 700},
+        'db'      : {name: 'db', x: 600, y: 750},
+    }
+
+
+    var packets = []
+    packets.push({
+        type: 'http',
+        x   : servers.internet.x,
+        y   : servers.internet.y,
+        to  : servers.web1
+    })
+
+
+    d3.timer(function() {
+        context.clearRect(0, 0, window.innerWidth, window.innerHeight)
+
+        packets.forEach(function(packet, index) {
+            context.beginPath();
+            context.fillStyle = '#96e6db';
+
+            context.arc(packet.x, packet.y, 15, Math.PI * 2, false);
+            context.fill();
+            context.closePath();
+
+
+            context.font="12px Helvetica"
+            context.fillStyle = '#000';
+            context.fillText(packet.type, packet.x - 10, packet.y, 100);
+            if (packet.x == packet.to.x && packet.y == packet.to.y) {
+                delete packets[index]
+            }
+            if (packet.x < packet.to.x)packet.x += Math.ceil((packet.to.x - packet.x) / 60)
+            if (packet.y < packet.to.y)packet.y += Math.ceil((packet.to.y - packet.y) / 60)
+            if (packet.x > packet.to.x)packet.x -= Math.ceil((packet.x - packet.to.x) / 60)
+            if (packet.y > packet.to.y)packet.y -= Math.ceil((packet.y - packet.to.y) / 60)
+        })
+
+        Object.getOwnPropertyNames(servers).forEach(function(serverName) {
+            var server = servers[serverName]
+            context.beginPath();
+            context.fillStyle = '#5cb85c';
+            context.arc(server.x, server.y, 40, Math.PI * 2, false);
+            context.fill();
+            context.closePath();
+
+            context.fillStyle = '#fff';
+            context.font="24px Helvetica"
+            context.fillText(server.name, server.x - 30, server.y, 100);
+
+        })
+    });
+
+    setInterval(function() {
+        var rand = Math.floor(Math.random() * 8) + 1
+        if (rand === 1) {
+            packets.push({
+                type: 'http',
+                x   : servers.internet.x,
+                y   : servers.internet.y,
+                to  : servers.web1
+            })
+        } else if (rand === 2) {
+            packets.push({
+                type: 'http',
+                x   : servers.web1.x,
+                y   : servers.web1.y,
+                to  : servers.internet
+            })
+        } else if (rand === 3) {
+            packets.push({
+                type: 'http',
+                x   : servers.web1.x,
+                y   : servers.web1.y,
+                to  : servers.api
+            })
+        } else if (rand === 4) {
+            packets.push({
+                type: 'http',
+                x   : servers.internet.x,
+                y   : servers.internet.y,
+                to  : servers.web2
+            })
+        } else if (rand === 7) {
+            packets.push({
+                type: 'http',
+                x   : servers.internet.x,
+                y   : servers.internet.y,
+                to  : servers.web3
+            })
+        } else if (rand === 5) {
+            packets.push({
+                type: 'https',
+                x   : servers.api.x,
+                y   : servers.api.y,
+                to  : servers.db
+            })
+        } else if (rand === 6) {
+            packets.push({
+                type: 'https',
+                x   : servers.db.x,
+                y   : servers.db.y,
+                to  : servers.api
+            })
+        }
+    }, 200)
+
+</script>
